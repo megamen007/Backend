@@ -1,93 +1,234 @@
 import json
 import sys
-
-task_id = 0
+import datetime
 
 class Task_Tracker:
     def __init__(self, id , description, status, createdAt, updatedAt):
-        global task_id
-        task_id += 1
-        self.id = task_id
+        self.id = self.get_next_id()
         self.description = description 
-        self.status = status
-        self.createdAt = createdAt
+        self.status = "todo"
+        self.createdAt = str(datetime.datetime.now())
         self.updatedAt = updatedAt
 
+    def getId(self):
+        return self.id
+
+    def get_next_id(self):
+        
+        try:
+            with open("Task_Tracker.json", "r") as f:
+                data = json.load(f)
+            if data:
+                return len(data) + 1
+            else :
+                return 1
+        except (FileExistsError , json.decoder.JSONDecodeError):
+            return 1
+
     def add(self):
+        
         task_data = {
             "id" : self.id,
             "description" : self.description,
             "status" : self.status,
             "createdAt" : self.createdAt,
             "updatedAt" : self.updatedAt
-        }
-        # print(task_data)
+            }
+        try:
+            with open("Task_Tracker.json", "r") as f:
+                try:
+                    data = json.load(f)
+                    data.append(task_data)
+                    print(data)
+                    # json.dump(task_data, data, indent=4)
+                    # print(data)
+                    # data
+                    # json.dump()
+                    # json.dump(task_data, f, indent=4)
 
-        # print (f" data ---> {task_data}")
-        with open("Task_Tracker.json", "r") as f:
-            # lines = [line for line in f.readlines() if line.strip('\n')]
-            # print(lines)
-            # if lines:
-            #     print("ok")
-            # else:
-            #     print("not ok")
-            try:
+                except json.decoder.JSONDecodeError:
+                    # print("Shite error or empty file")
+                    data = [
+                        {
+                            "id" : self.id,
+                            "description" : self.description,
+                            "status" : self.status,
+                            "createdAt" : self.createdAt,
+                            "updatedAt" : self.updatedAt
+                        }
+                    ]
+        except FileNotFoundError:
+            data = []
+        
+        # data.append(task_data)
+
+        with open("Task_Tracker.json", "w") as f:
+            json.dump(data, f, indent=4)
+
+    def update(self, id ,newdescription):
+
+        try:
+            with open("Task_Tracker.json", "r") as f:
                 data = json.load(f)
-            except json.decoder.JSONDecodeError:
-                print("not ok")
+        except (FileExistsError, json.decoder.JSONDecodeError):
+            print("No task file found.")
+            return 
+        
+        # if int(id) < 1 or int(id) > len(data):
+        #     print("u enter a non valid id try again", file=sys.stderr)
 
-            # print(len(data))
-            # if len(data):
-            #     print("there 's no data")
-            # else :
-            #     print(data)
-            # print(data)
-            # json.dump(task_data, f, indent=4)
-            # f.write("\n")
+        i = 0
+        while i < len(data):
+            if data[i]["id"] == int(id):
+                data[i]["description"] =  join_args(newdescription)
+                data[i]["updatedAt"] =  str(datetime.datetime.now())
+            i+=1
+        # if newdescription:
+        #     data[int(id) - 1]["description"] =  join_args(newdescription)
+        #     data[int(id) - 1]["updatedAt"]  = str(datetime.datetime.now())
+        # else:
+        #     print("u enter an update cmd zithout specifying new description .", file=sys.stderr)
+                
+
+        with open("Task_Tracker.json", "w") as f:
+            json.dump(data, f, indent=4)
+
+    def delete(self , id):
+
+        try:
+            with open("Task_Tracker.json", "r") as f:
+                data = json.load(f)
+        except (FileExistsError, json.decoder.JSONDecodeError):
+            print("the Task file not found")
+            return
+        
+        new_data = []
+
+        i = 0
+        while i < len(data):
+            if data[i]["id"] != int(id):
+                new_data.append(data[i])
+            i+=1
+
+        
+        with open("Task_Tracker.json", "w") as f:
+            json.dump(new_data, f, indent=4)
             
+    def mark_in_progress(self, id):
 
-    # def update():
-    #     pass
-    # def delete():
-    #     pass
-    # def mark_in_progress():
-    #     pass
-    # def mark_done():
-    #     pass
-    # def list_():
-    #     pass
-    # def list_done():
-    #     pass
-    # def list_todo():
-    #     pass
-    # def list_in_progress():
-    #     pass
+        try:
+            with open("Task_Tracker.json", "r") as f:
+                data = json.load(f)
+        except (FileExistsError, json.decoder.JSONDecodeError):
+            print("No task file found.")
+            return 
+        
+
+        # data[int(id) - 1]["status"] = "in-progress"
+
+        i = 0
+        while i < len(data):
+            if data[i]["id"] == int(id):
+                data[i]["status"] =  "in-progress"
+                data[i]["updatedAt"] =  str(datetime.datetime.now())
+            i+=1
+
+        with open("Task_Tracker.json", "w") as f:
+            json.dump(data, f, indent=4)
+
+    def mark_done(self, id):
+
+        try:
+            with open("Task_Tracker.json", "r") as f:
+                data = json.load(f)
+        except (FileExistsError, json.decoder.JSONDecodeError):
+            print("No task file found.")
+            return 
+        
+        for x in data:
+            if x["id"] == id:
+                x["status"] = "done"
+
+    def list_(self):
+
+        try:
+            with open("Task_Tracker.json", "r") as f:
+                data = json.load(f)
+        except (FileExistsError, json.decoder.JSONDecodeError):
+            print("No task file found.")
+            return
+
+        print("Current Tasks : ")
+        for task in data:
+                    print(task)
+
+    def list_done(self):
+
+        try:
+
+            with open("Task_Tracker.json", "r") as f:
+                data = json.load(f)
+        except (FileExistsError, json.decoder.JSONDecodeError):
+            print("No task file found.")
+            return
+        
+        for x in data:
+            if x["status"] == "done":
+                print(x)
+        
+    def list_todo(self):
+
+        try:
+
+            with open("Task_Tracker.json", "r") as f:
+                data = json.load(f)
+        except (FileExistsError, json.decoder.JSONDecodeError):
+            print("No task file found.")
+            return
+        
+        for x in data:
+            if x["status"] == "todo":
+                print(x)
+        
+    def list_in_progress(self):
+       
+        try:
+            with open("Task_Tracker.json", "r") as f:
+                data = json.load(f)
+        except (FileExistsError, json.decoder.JSONDecodeError):
+            print("No task file found.")
+            return
+        
+        for x in data:
+            if x["status"] == "in-progress":
+                print(x)
     
 
-# def Task_Cmds():
+def Task_Cmds(cmds):
 
-#     global C1
+    global taskito
     
-#     if args[0] == "add":
-#         C1.add()
-#     elif args[0] == "update":
-#         C1.update()
-#     elif args[0] == "delete":
-#         C1.delete()
-#     elif args[0] == "mark-in-progress":
-#         C1.mark_in_progress()
-#     elif args[0] == "mark-done":
-#         C1.mark_done()
-#     elif args[0] == "list":
-#         C1.list_()
-#     elif args[0] == "list done":
-#         C1.list_done()
-#     elif args[0] == "list todo":
-#         C1.list_todo()
-#     elif args[0] == "list in-progress":
-#         C1.list_in_progress()
-#     else:
-#         print(" the cmd that u enter is not available in th ecmds list , please try again")
+
+    if cmds == "add":
+        taskito.add()
+    elif cmds == "update":
+        taskito.update(args[1], args[2:])
+    elif cmds == "delete":
+        taskito.delete(args[1])
+    elif cmds == "mark-in-progress":
+        taskito.mark_in_progress(args[1])
+    elif cmds == "mark-done":
+        taskito.mark_done(args[1])
+    elif cmds == "list":
+        taskito.list_()
+    elif cmds == "list done":
+        taskito.list_done()
+    elif cmds == "list todo":
+        taskito.list_todo()
+    elif cmds == "list in-progress":
+        taskito.list_in_progress()
+    else:
+        print(" the cmd that u enter is not available in th ecmds list , please try again")
 
 
 def join_args(args):
@@ -98,8 +239,13 @@ def join_args(args):
 
 
 args = sys.argv[1:]
-C1 = Task_Tracker(id , join_args(args[1:]), "present", "1", "3")
-# Task_Cmds()
-print (f"u entered -->  {args}")
+cmds = ""
+if args:
+    cmds = args[0]
+if not args:
+    print("please provide a command to execute", file=sys.stderr)
+taskito = Task_Tracker(id , join_args(args[1:]), "", "", "")
+Task_Cmds(cmds)
 
-C1.add()
+# x = [{"id":"1", "name":"salah", "age": 23}, {"id": 2, "name":"simo", "age": 24}]
+# print(x[0]["name"])
