@@ -145,9 +145,15 @@ class Task_Tracker:
             print("No task file found.")
             return 
         
-        for x in data:
-            if x["id"] == id:
-                x["status"] = "done"
+        i = 0
+        while i < len(data):
+            if data[i]["id"] == int(id):
+                data[i]["status"] =  "done"
+                data[i]["updatedAt"] =  str(datetime.datetime.now())
+            i+=1
+
+        with open("Task_Tracker.json", "w") as f:
+            json.dump(data, f, indent=4)
 
     def list_(self):
 
@@ -160,7 +166,7 @@ class Task_Tracker:
 
         print("Current Tasks : ")
         for task in data:
-                    print(task)
+                    print(task["description"])
 
     def list_done(self):
 
