@@ -169,7 +169,6 @@ class Task_Tracker:
                     print(task["description"])
 
     def list_done(self):
-
         try:
 
             with open("Task_Tracker.json", "r") as f:
@@ -180,7 +179,7 @@ class Task_Tracker:
         
         for x in data:
             if x["status"] == "done":
-                print(x)
+                print(x["description"])
         
     def list_todo(self):
 
@@ -194,7 +193,7 @@ class Task_Tracker:
         
         for x in data:
             if x["status"] == "todo":
-                print(x)
+                print(x["description"])
         
     def list_in_progress(self):
        
@@ -207,13 +206,14 @@ class Task_Tracker:
         
         for x in data:
             if x["status"] == "in-progress":
-                print(x)
+                print(x["description"])
     
 
 def Task_Cmds(cmds):
 
     global taskito
     
+    # print(join_args(args[0:]))
 
     if cmds == "add":
         taskito.add()
@@ -225,13 +225,13 @@ def Task_Cmds(cmds):
         taskito.mark_in_progress(args[1])
     elif cmds == "mark-done":
         taskito.mark_done(args[1])
-    elif cmds == "list":
+    elif join_args(args[0:]) == "list":
         taskito.list_()
-    elif cmds == "list done":
+    elif join_args(args[0:]) == "list done":
         taskito.list_done()
-    elif cmds == "list todo":
+    elif join_args(args[0:]) == "list todo":
         taskito.list_todo()
-    elif cmds == "list in-progress":
+    elif join_args(args[0:]) == "list in-progress":
         taskito.list_in_progress()
     else:
         print(" the cmd that u enter is not available in th ecmds list , please try again")
